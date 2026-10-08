@@ -1,0 +1,669 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Português">
+<title>Português — Cartões</title>
+<style>
+  :root{
+    --bg:#f4f5f7; --card:#ffffff; --ink:#1a1c20; --muted:#6b7280;
+    --line:#e6e8ec; --shadow:0 1px 2px rgba(20,22,28,.05),0 8px 24px rgba(20,22,28,.06);
+    --m:#2563eb; --m-bg:#eaf1ff; --f:#db2777; --f-bg:#fdeaf4;
+    --warn:#d97706; --warn-bg:#fff4e2; --accent:#0f766e;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0f1114; --card:#171a1f; --ink:#e9ebef; --muted:#9aa1ad;
+      --line:#262b33; --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+      --m:#7ea8ff; --m-bg:#1a2740; --f:#f27bb5; --f-bg:#3a1c2c;
+      --warn:#f0b25a; --warn-bg:#3a2c14; --accent:#5eead4;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;padding:24px 16px 64px}
+  .wrap{max-width:1200px;margin:0 auto}
+  header{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;margin-bottom:20px}
+  h1{font-size:22px;font-weight:650;margin:0;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .controls{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-left:auto}
+  .ctl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);user-select:none}
+  .ctl input[type=range]{width:110px;accent-color:var(--accent)}
+  .switch{cursor:pointer}
+  .switch input{accent-color:var(--accent);width:16px;height:16px}
+  select{font:inherit;font-size:13px;padding:4px 8px;border:1px solid var(--line);
+    border-radius:8px;background:var(--card);color:var(--ink)}
+  .search{flex:1 1 220px;min-width:180px;font:inherit;font-size:14px;padding:9px 14px;
+    border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+  .search::placeholder{color:var(--muted)}
+  .search:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+  .empty{display:none;color:var(--muted);font-size:14px;padding:24px 4px}
+  .card.hidden{display:none}
+  .section{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;
+    color:var(--muted);margin:30px 2px 12px}
+  .section:first-of-type{margin-top:6px}
+  .g.v{color:var(--accent);background:transparent;border:1px solid var(--accent)}
+  .prep{color:var(--muted);font-weight:450;font-size:15px}
+  .card.phrase .word{font-size:16px;line-height:1.3;font-weight:600}
+  .card.phrase .ipa{margin-top:6px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+  .card{position:relative;background:var(--card);border:1px solid var(--line);
+    border-radius:16px;padding:16px 16px 14px;box-shadow:var(--shadow);cursor:pointer;
+    transition:transform .12s ease,box-shadow .12s ease;overflow:hidden}
+  .card:hover{transform:translateY(-2px)}
+  .card:active{transform:translateY(0) scale(.99)}
+  .card.speaking{outline:2px solid var(--accent);outline-offset:-2px}
+  .top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+  .word{font-size:21px;font-weight:640;letter-spacing:-.01em;line-height:1.15}
+  .badges{display:flex;gap:6px;flex-shrink:0}
+  .g{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;line-height:1}
+  .g.m{color:var(--m);background:var(--m-bg)}
+  .g.f{color:var(--f);background:var(--f-bg)}
+  .ex{font-size:11px;font-weight:800;color:var(--warn);background:var(--warn-bg);
+    padding:3px 7px;border-radius:999px;line-height:1}
+  .ipa{font-size:14px;color:var(--accent);margin-top:8px;letter-spacing:.01em;text-transform:lowercase}
+  .tr{margin-top:10px;font-size:14px;line-height:1.4}
+  .ru{color:var(--ink)}
+  .en{color:var(--muted);font-size:13px}
+  .note{margin-top:8px;font-size:12px;color:var(--warn);line-height:1.35;
+    border-top:1px dashed var(--line);padding-top:8px}
+  body.hide-tr .tr,body.hide-tr .note{display:none}
+  .spk{position:absolute;right:12px;bottom:12px;color:var(--muted);opacity:.5;font-size:14px}
+  .warnbar{display:none;margin:0 0 16px;padding:10px 14px;border-radius:10px;
+    background:var(--warn-bg);color:var(--warn);font-size:13px}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Português — Cartões</h1>
+      <div class="sub">Tap a card to hear it · EP transcription · <b>!</b> = gender you must memorise</div>
+    </div>
+    <div class="controls">
+      <input id="search" class="search" type="search" placeholder="Search — слово, перевод, транскрипция…" autocomplete="off">
+      <label class="ctl">Voice <select id="voice"></select></label>
+      <label class="ctl">Speed <input id="rate" type="range" min=".6" max="1.1" step=".05" value=".9"></label>
+      <label class="ctl switch"><input id="toggle" type="checkbox" checked> Translations</label>
+    </div>
+  </header>
+  <div class="warnbar" id="warnbar"></div>
+  <h2 class="section" id="head-sub">Substantivos · существительные</h2>
+  <div class="grid" id="grid"></div>
+  <h2 class="section" id="head-verbs">Verbos · глаголы</h2>
+  <div class="grid" id="grid-verbs"></div>
+  <h2 class="section" id="head-frases">Frases · фразы</h2>
+  <div class="grid" id="grid-frases"></div>
+  <h2 class="section" id="head-pares">Pares · пары слов</h2>
+  <div class="grid" id="grid-pares"></div>
+  <h2 class="section" id="head-pedidos">Posso / podes · я могу / ты можешь</h2>
+  <div class="grid" id="grid-pedidos"></div>
+  <div class="empty" id="empty">Ничего не найдено.</div>
+</div>
+
+<script>
+const WORDS = [
+  {a:"a",  w:"escada",              g:"f", ipa:"а-шкáда",            ru:"лестница / стремянка", en:"stairs / ladder"},
+  {a:"a",  w:"varanda",             g:"f", ipa:"а-варáнда",          ru:"балкон",               en:"balcony"},
+  {a:"o",  w:"telemóvel",           g:"m", ipa:"у-тылымóвэл",        ru:"мобильный телефон",    en:"mobile phone", ex:"На -l — род не виден по окончанию, запомнить: мужской."},
+  {a:"a",  w:"estação de comboio",  g:"f", ipa:"а-штасáу ды комбóйу", ru:"ж/д станция",        en:"train station"},
+  {a:"o",  w:"parque",              g:"m", ipa:"у-пáрк",             ru:"парк",                 en:"park", ex:"На -e — род не виден по окончанию: мужской."},
+  {a:"o",  w:"posto de gasolina",   g:"m", ipa:"у-пóшту ды газулина", ru:"заправка (АЗС)",      en:"gas station", alt:"o posto de combustível / de abastecimento"},
+  {a:"o",  w:"saco",                g:"m", ipa:"у-сáку",             ru:"пакет / мешок",        en:"bag"},
+  {a:"os", w:"pés",                 g:"m", ipa:"уш-пéш",             ru:"ноги (ступни)",        en:"feet", say:"os pés"},
+  {a:"a",  w:"carpete",             g:"f", ipa:"а-карпéт",           ru:"ковролин",             en:"fitted carpet", ex:"На -e женский — а похожий o tapete мужской. Запомнить."},
+  {a:"o",  w:"tapete",              g:"m", ipa:"у-тапéт",            ru:"ковёр / коврик",       en:"rug", ex:"На -e — род не виден по окончанию: мужской."},
+  {a:"o",  w:"carro",               g:"m", ipa:"у-кáрру",           ru:"машина",               en:"car"},
+  {a:"a",  w:"bilheteria",          g:"f", ipa:"а-бильытырíа",       ru:"билетная касса",       en:"ticket office", alt:"em Portugal: a bilheteira"},
+  {a:"a",  w:"igreja",              g:"f", ipa:"а-игрéжа",           ru:"церковь",              en:"church"},
+  {a:"a",  w:"cozinha",             g:"f", ipa:"а-кузиньа",          ru:"кухня",                en:"kitchen"},
+  {a:"o",  w:"quarto",              g:"m", ipa:"у-куáрту",           ru:"комната / спальня",    en:"room / bedroom"},
+  {a:"o",  w:"apartamento",         g:"m", ipa:"у-апартамéнту",      ru:"квартира",             en:"apartment"},
+  {a:"a",  w:"casa",                g:"f", ipa:"а-кáза",             ru:"дом",                  en:"house / home"},
+  {a:"o",  w:"museu",               g:"m", ipa:"у-музéу",            ru:"музей",                en:"museum"},
+  {a:"o",  w:"estacionamento",      g:"m", ipa:"у-штасьунамéнту",   ru:"парковка",             en:"parking / car park"},
+  {a:"o",  w:"autocarro",           g:"m", ipa:"у-аутукáрру",        ru:"автобус",              en:"bus"},
+  {a:"a",  w:"mesa",                g:"f", ipa:"а-мéза",             ru:"стол",                 en:"table"},
+  {a:"o",  w:"campo",               g:"m", ipa:"у-кáмпу",           ru:"поле / деревня",       en:"field / countryside"},
+  {a:"a",  w:"mata",                g:"f", ipa:"а-мáта",             ru:"лес / роща",           en:"woods"},
+  {a:"a",  w:"praia",               g:"f", ipa:"а-прáйа",           ru:"пляж",                 en:"beach"},
+  {a:"a",  w:"loja",                g:"f", ipa:"а-лóжа",             ru:"магазин",              en:"shop / store"},
+  {a:"a",  w:"rua",                 g:"f", ipa:"а-рýа",             ru:"улица",                en:"street"},
+  {a:"a",  w:"sala",                g:"f", ipa:"а-сáла",            ru:"гостиная / зал",       en:"living room"},
+  {a:"o",  w:"frigorífico",         g:"m", ipa:"у-фригурифику",      ru:"холодильник",          en:"fridge"},
+  {a:"a",  w:"estante",             g:"f", ipa:"а-штáнт",           ru:"стеллаж / книжная полка", en:"bookshelf", ex:"На -e женский — запомнить."},
+  {a:"a",  w:"gaveta",              g:"f", ipa:"а-гавéта",           ru:"выдвижной ящик",       en:"drawer"},
+  {a:"as", w:"mãos",                g:"f", ipa:"аш-мáуш",           ru:"руки (кисти)",         en:"hands", say:"as mãos", ex:"Женский, хотя окончание -ão обычно мужское. Классическое исключение."},
+  {a:"a",  w:"cabeça",              g:"f", ipa:"а-кабéса",           ru:"голова",               en:"head"},
+  {a:"o",  w:"cabelo",              g:"m", ipa:"у-кабéлу",           ru:"волосы",               en:"hair"},
+  {a:"a",  w:"parede",              g:"f", ipa:"а-парéд",            ru:"стена",                en:"wall", ex:"На -e женский — запомнить."},
+  {a:"o",  w:"jardim",              g:"m", ipa:"у-жардим",           ru:"сад",                  en:"garden"},
+  {a:"a",  w:"gata",                g:"f", ipa:"а-гáта",             ru:"кошка",                en:"cat (female)"},
+  {a:"o",  w:"livro",               g:"m", ipa:"у-ливру",           ru:"книга",                en:"book"},
+  {a:"os", w:"pais",                g:"m", ipa:"уш-пáйш",           ru:"родители",             en:"parents", say:"os pais"},
+  {a:"a",  w:"mensagem",            g:"f", ipa:"а-мынсáжень",        ru:"сообщение",            en:"message"},
+  {a:"a",  w:"casa de banho",       g:"f", ipa:"а-кáза ды баньу",    ru:"ванная / туалет",      en:"bathroom"},
+  {a:"o",  w:"banco",               g:"m", ipa:"у-бáнку",           ru:"банк / скамейка",      en:"bank / bench"},
+  {a:"a",  w:"janela",              g:"f", ipa:"а-жанéла",           ru:"окно",                 en:"window"},
+  {a:"o",  w:"computador",          g:"m", ipa:"у-компутадóр",      ru:"компьютер",            en:"computer"},
+  {a:"as", w:"prateleiras",         g:"f", ipa:"аш-пратылéйраш",     ru:"полки",                en:"shelves", say:"as prateleiras"},
+  {a:"a",  w:"caixa",               g:"f", ipa:"а-кáйша",           ru:"коробка / касса",      en:"box / checkout"},
+  {a:"o",  w:"sofá",                g:"m", ipa:"у-суфá",            ru:"диван",                en:"sofa", ex:"Мужской, хотя окончание -á выглядит как женское -a. Исключение."},
+  {a:"o",  w:"teto",                g:"m", ipa:"у-тéту",            ru:"потолок",              en:"ceiling"},
+  {a:"a",  w:"piscina",             g:"f", ipa:"а-пишсина",          ru:"бассейн",              en:"swimming pool"},
+  {a:"a",  w:"escola",              g:"f", ipa:"а-шкóла",           ru:"школа",                en:"school"},
+  {a:"o",  w:"prato",               g:"m", ipa:"у-прáту",           ru:"тарелка / блюдо",      en:"plate / dish"},
+  {a:"o",  w:"táxi",                g:"m", ipa:"у-тáкси",           ru:"такси",                en:"taxi"},
+  {a:"a",  w:"paragem",             g:"f", ipa:"а-парáжень",         ru:"остановка",            en:"(bus) stop"},
+
+  {a:"a",  w:"população",     g:"f", ipa:"а-пупуласáу",     ru:"население",                  en:"population"},
+  {a:"o",  w:"túnel",         g:"m", ipa:"у-тýнэл",         ru:"туннель",                    en:"tunnel"},
+  {a:"o",  w:"coração",       g:"m", ipa:"у-курасáу",       ru:"сердце",                     en:"heart", ex:"1"},
+  {a:"o",  w:"cachorro",      g:"m", ipa:"у-кашóрру",       ru:"щенок (в PT); собака (браз.)", en:"puppy / dog (BR)"},
+  {a:"a",  w:"maçã",          g:"f", ipa:"а-масáн",         ru:"яблоко",                     en:"apple"},
+  {a:"a",  w:"revista",       g:"f", ipa:"а-рывишта",       ru:"журнал",                     en:"magazine"},
+  {a:"a",  w:"informação",    g:"f", ipa:"а-инфурмасáу",    ru:"информация",                 en:"information"},
+  {a:"a",  w:"cor",           g:"f", ipa:"а-кор",           ru:"цвет",                       en:"colour", ex:"1"},
+  {a:"a",  w:"cadeira",       g:"f", ipa:"а-кадэйра",       ru:"стул",                       en:"chair"},
+  {a:"o",  w:"olho",          g:"m", ipa:"у-óлью",          ru:"глаз",                       en:"eye"},
+  {a:"a",  w:"pressão",       g:"f", ipa:"а-прысáу",        ru:"давление",                   en:"pressure"},
+  {a:"o",  w:"homem",         g:"m", ipa:"у-óмень",         ru:"мужчина, человек",           en:"man"},
+  {a:"o",  w:"valor",         g:"m", ipa:"у-валóр",         ru:"ценность, стоимость",        en:"value"},
+  {a:"o",  w:"som",           g:"m", ipa:"у-сон",           ru:"звук",                       en:"sound"},
+  {a:"a",  w:"organização",   g:"f", ipa:"а-организасáу",   ru:"организация",                en:"organization"},
+  {a:"a",  w:"juventude",     g:"f", ipa:"а-жувэнтýд",      ru:"молодость",                  en:"youth"},
+  {a:"o",  w:"copo",          g:"m", ipa:"у-кóпу",          ru:"стакан",                     en:"glass"},
+  {a:"a",  w:"decisão",       g:"f", ipa:"а-дысизáу",       ru:"решение",                    en:"decision"},
+  {a:"o",  w:"prédio",        g:"m", ipa:"у-прэ́дью",        ru:"здание, многоэтажка",        en:"building"},
+  {a:"a",  w:"liberdade",     g:"f", ipa:"а-либэрдáд",      ru:"свобода",                    en:"freedom"},
+  {a:"o",  w:"arroz",         g:"m", ipa:"у-аррóш",         ru:"рис",                        en:"rice", ex:"1"},
+  {a:"o",  w:"nariz",         g:"m", ipa:"у-нарíш",         ru:"нос",                        en:"nose", ex:"1"},
+  {a:"a",  w:"inteligência",  g:"f", ipa:"а-интылижéнсья",  ru:"интеллект, ум",              en:"intelligence"},
+  {a:"a",  w:"viagem",        g:"f", ipa:"а-вья́жень",       ru:"поездка, путешествие",       en:"trip / journey"},
+  {a:"a",  w:"educação",      g:"f", ipa:"а-идукасáу",      ru:"образование; воспитание",    en:"education"},
+  {a:"a",  w:"estupidez",     g:"f", ipa:"а-штупидэ́ш",      ru:"глупость",                   en:"stupidity"},
+  {a:"o",  w:"garfo",         g:"m", ipa:"у-гáрфу",         ru:"вилка",                      en:"fork"},
+  {a:"o",  w:"anel",          g:"m", ipa:"у-анэ́л",          ru:"кольцо",                     en:"ring"},
+  {a:"o",  w:"ovo",           g:"m", ipa:"у-óву",           ru:"яйцо",                       en:"egg"},
+  {a:"a",  w:"comunicação",   g:"f", ipa:"а-кумуникасáу",   ru:"общение, коммуникация",      en:"communication"},
+  {a:"a",  w:"pulseira",      g:"f", ipa:"а-пулсэйра",      ru:"браслет",                    en:"bracelet"},
+  {a:"o",  w:"colar",         g:"m", ipa:"у-кулáр",         ru:"ожерелье, колье",            en:"necklace", ex:"1"},
+  {a:"o",  w:"relógio",       g:"m", ipa:"у-рылóжью",       ru:"часы",                       en:"clock / watch"},
+  {a:"o",  w:"país",          g:"m", ipa:"у-паíш",          ru:"страна",                     en:"country"},
+  {a:"o",  w:"fim",           g:"m", ipa:"у-фин",           ru:"конец",                      en:"end"},
+  {a:"o",  w:"cinema",        g:"m", ipa:"у-синэ́ма",        ru:"кино, кинотеатр",            en:"cinema", ex:"1"},
+  {a:"a",  w:"saúde",         g:"f", ipa:"а-саýд",          ru:"здоровье",                   en:"health"},
+  {a:"o",  w:"professor",     g:"m", ipa:"у-пруфысóр",      ru:"учитель, преподаватель",     en:"teacher"},
+  {a:"o",  w:"papel",         g:"m", ipa:"у-папэ́л",         ru:"бумага; роль",               en:"paper; role"},
+  {a:"a",  w:"porta",         g:"f", ipa:"а-пóрта",         ru:"дверь",                      en:"door"},
+  {a:"o",  w:"colchão",       g:"m", ipa:"у-колшáу",        ru:"матрас",                     en:"mattress"},
+  {a:"a",  w:"faca",          g:"f", ipa:"а-фáка",          ru:"нож",                        en:"knife"},
+  {a:"a",  w:"romã",          g:"f", ipa:"а-румáн",         ru:"гранат (плод)",              en:"pomegranate"},
+  {a:"o",  w:"leão",          g:"m", ipa:"у-льáу",          ru:"лев",                        en:"lion"},
+  {a:"o",  w:"jornal",        g:"m", ipa:"у-журнáл",        ru:"газета",                     en:"newspaper", alt:"не journal, а jornal"},
+  {a:"a",  w:"confusão",      g:"f", ipa:"а-конфузáу",      ru:"путаница, беспорядок",       en:"confusion"},
+  {a:"o",  w:"dom",           g:"m", ipa:"у-дон",           ru:"дар, талант",                en:"gift (talent)"},
+  {a:"a",  w:"colher",        g:"f", ipa:"а-кульэ́р",        ru:"ложка",                      en:"spoon", ex:"1"},
+  {a:"a",  w:"farinha",       g:"f", ipa:"а-фаринья",       ru:"мука",                       en:"flour"},
+  {a:"o",  w:"avião",         g:"m", ipa:"у-авьáу",         ru:"самолёт",                    en:"plane"},
+  {a:"o",  w:"lápis",         g:"m", ipa:"у-лáпиш",         ru:"карандаш",                   en:"pencil"},
+  {a:"o",  w:"sapato",        g:"m", ipa:"у-сапáту",        ru:"ботинок, туфля",             en:"shoe"},
+  {a:"a",  w:"nêspera",       g:"f", ipa:"а-нэ́шпыра",       ru:"мушмула (плод)",             en:"loquat"},
+  {a:"a",  w:"universidade",  g:"f", ipa:"а-унивэрсидáд",   ru:"университет",                en:"university"},
+  {a:"a",  w:"tensão",        g:"f", ipa:"а-тэнсáу",        ru:"напряжение",                 en:"tension"},
+  {a:"o",  w:"céu",           g:"m", ipa:"у-сэу",           ru:"небо",                       en:"sky"},
+  {a:"o",  w:"motor",         g:"m", ipa:"у-мутóр",         ru:"двигатель, мотор",           en:"engine / motor"},
+  {a:"o",  w:"pão",           g:"m", ipa:"у-пáу",           ru:"хлеб",                       en:"bread"},
+  {a:"a",  w:"virtude",       g:"f", ipa:"а-виртýд",        ru:"добродетель",                en:"virtue"},
+  {a:"o",  w:"gato",          g:"m", ipa:"у-гáту",          ru:"кот",                        en:"cat (male)"},
+  {a:"a",  w:"alma",          g:"f", ipa:"а-áлма",          ru:"душа",                       en:"soul"},
+  {a:"o",  w:"sol",           g:"m", ipa:"у-сол",           ru:"солнце",                     en:"sun"},
+  {a:"a",  w:"irmã",          g:"f", ipa:"а-ирмáн",         ru:"сестра",                     en:"sister"},
+  {a:"a",  w:"mulher",        g:"f", ipa:"а-мульэ́р",        ru:"женщина; жена",              en:"woman / wife"},
+  {a:"a",  w:"criança",       g:"f", ipa:"а-крьáнса",       ru:"ребёнок (всегда a criança, и о мальчике)", en:"child", ex:"1"},
+  {a:"a",  w:"estrela",       g:"f", ipa:"а-штрэ́ла",        ru:"звезда",                     en:"star"},
+  {a:"a",  w:"flor",          g:"f", ipa:"а-флор",          ru:"цветок",                     en:"flower", ex:"1"},
+  {a:"a",  w:"cidade",        g:"f", ipa:"а-сидáд",         ru:"город",                      en:"city"},
+  {a:"o",  w:"horário",       g:"m", ipa:"у-урáрью",        ru:"расписание, график",         en:"schedule / timetable"},
+  {a:"a",  w:"televisão",     g:"f", ipa:"а-тылывизáу",     ru:"телевизор; телевидение",     en:"television"},
+  {a:"o",  w:"encontro",      g:"m", ipa:"у-энкóнтру",      ru:"встреча, свидание",          en:"meeting / date"},
+  {a:"a",  w:"hora",          g:"f", ipa:"а-óра",           ru:"час; время",                 en:"hour / time"},
+  {a:"a",  w:"nuvem",         g:"f", ipa:"а-нýвэнь",        ru:"облако",                     en:"cloud", ex:"1"},
+  {a:"o",  w:"armário",       g:"m", ipa:"у-армáрью",       ru:"шкаф, шкафчик (любой)",      en:"cupboard / cabinet / wardrobe"},
+  {a:"o",  w:"roupeiro",      g:"m", ipa:"у-ройпэйру",      ru:"платяной шкаф, гардероб",    en:"wardrobe (for clothes)"},
+  {a:"o",  w:"escritório",    g:"m", ipa:"у-шкритóрью",     ru:"офис, рабочий кабинет",      en:"office / study"},
+  {a:"a",  w:"fila",          g:"f", ipa:"а-фила",          ru:"очередь",                    en:"queue / line"},
+  {a:"o",  w:"comboio",       g:"m", ipa:"у-комбóйу",       ru:"поезд",                      en:"train"},
+  {a:"o",  w:"bilhete",       g:"m", ipa:"у-бильéт",        ru:"билет",                      en:"ticket"},
+  {a:"a",  w:"secretária",    g:"f", ipa:"а-сыкретáрья",    ru:"письменный стол; секретарь(ша)", en:"desk; secretary"},
+  {a:"o",  w:"amigo",         g:"m", ipa:"у-амигу",         ru:"друг (amiga — подруга)",     en:"friend"},
+  {a:"o",  w:"marido",        g:"m", ipa:"у-мариду",        ru:"муж",                        en:"husband"},
+  {a:"a",  w:"bicicleta",     g:"f", ipa:"а-бисиклéта",     ru:"велосипед",                  en:"bicycle"},
+  {a:"o",  w:"ginásio",       g:"m", ipa:"у-жинáзью",       ru:"спортзал",                   en:"gym"},
+  {a:"a",  w:"esplanada",     g:"f", ipa:"а-шпланáда",      ru:"терраса кафе (столики на улице)", en:"café terrace"},
+  {a:"o",  w:"terraço",       g:"m", ipa:"у-тырáсу",        ru:"терраса (большая, на крыше)", en:"terrace / roof terrace"},
+  {a:"o",  w:"formulário",    g:"m", ipa:"у-фурмулáрью",    ru:"форма, анкета",              en:"form"},
+  {a:"o",  w:"impresso",      g:"m", ipa:"у-импрэ́су",       ru:"бланк (в учреждении)",       en:"printed form"},
+  {a:"o",  w:"documento",     g:"m", ipa:"у-дукумэ́нту",     ru:"документ",                   en:"document"},
+  {a:"a",  w:"encomenda",     g:"f", ipa:"а-энкумэ́нда",     ru:"посылка; заказ",             en:"parcel; order"},
+  {a:"a",  w:"conta",         g:"f", ipa:"а-кóнта",         ru:"счёт (в кафе); аккаунт",     en:"bill; account"},
+  {a:"a",  w:"saia",          g:"f", ipa:"а-сáйа",          ru:"юбка",                       en:"skirt", ex:"Не путать с a saída — выход."},
+  {a:"as", w:"calças de ganga", g:"f", ipa:"аш-кáлсаш ды гáнга", ru:"джинсы",               en:"jeans", say:"as calças de ganga"},
+  {a:"a",  w:"aliança",       g:"f", ipa:"а-альянса",       ru:"обручальное кольцо",         en:"wedding ring"},
+  {a:"a",  w:"sobremesa",     g:"f", ipa:"а-субрымéза",     ru:"десерт",                     en:"dessert"},
+];
+
+const VERBS = [
+  {w:"sair",          prep:"de", ipa:"саи́р",            ru:"выходить, уходить",                    en:"to go out / leave"},
+  {w:"entrar",        prep:"em", ipa:"энтра́р",          ru:"входить (во что-то)",                  en:"to enter / go in"},
+  {w:"colocar",                  ipa:"кулука́р",         ru:"класть, помещать (размещать)",         en:"to place / put"},
+  {w:"pôr",                      ipa:"пор",              ru:"класть, ставить (базовый; = colocar)", en:"to put / place"},
+  {w:"voltar",                   ipa:"волта́р",          ru:"возвращаться (самому)",                en:"to return / come back"},
+  {w:"regressar",                ipa:"рыгрыса́р",        ru:"возвращаться (формальнее voltar)",     en:"to return / go back"},
+  {w:"devolver",                 ipa:"дыволвэ́р",        ru:"возвращать, отдавать назад (вещь)",    en:"to give back / return sth"},
+  {w:"ir",            prep:"a",  ipa:"ир",               ru:"идти, ехать",                          en:"to go"},
+  {w:"ir às compras",            ipa:"ир аш ко́мпраш",   ru:"ходить за покупками",                  en:"to go shopping"},
+  {w:"ir de férias",             ipa:"ир дэ фэ́риаш",    ru:"ехать в отпуск (правильно de férias, не às)", en:"to go on holiday"},
+  {w:"ver",                      ipa:"вэр",              ru:"видеть, смотреть",                     en:"to see / watch"},
+  {w:"poder",                    ipa:"пудэ́р",           ru:"мочь, быть в состоянии",               en:"can / to be able to"},
+  {w:"comprar",                  ipa:"компра́р",         ru:"покупать",                             en:"to buy"},
+  {w:"vender",                   ipa:"вэндэ́р",          ru:"продавать",                            en:"to sell"},
+  {w:"trazer",                   ipa:"тразэ́р",          ru:"приносить (сюда)",                     en:"to bring"},
+  {w:"buscar",                   ipa:"бушка́р",          ru:"забирать, идти за; искать",            en:"to fetch / pick up; look for"},
+  {w:"dizer",                    ipa:"дизэ́р",           ru:"говорить, сказать",                    en:"to say / tell"},
+  {w:"dançar",                   ipa:"данса́р",          ru:"танцевать",                            en:"to dance"},
+  {w:"parar",         prep:"de", ipa:"пара́р",           ru:"останавливаться; переставать (parar de + инф.)", en:"to stop"},
+  {w:"deixar",        prep:"de", ipa:"дэйша́р",          ru:"бросать, переставать (deixar de + инф.); оставлять", en:"to stop / quit; to leave, let"},
+  {w:"levar",                    ipa:"лыва́р",           ru:"относить, брать с собой (отсюда)",     en:"to take / carry away"},
+  {w:"levantar",                 ipa:"лыванта́р",        ru:"поднимать; снимать деньги; вставать (-se)", en:"to lift / raise; withdraw"},
+  {w:"experimentar",             ipa:"эйшпырименьта́р",  ru:"пробовать; примерять (одежду)",        en:"to try / try on"},
+  {w:"provar",                   ipa:"прува́р",          ru:"пробовать на вкус; доказывать",        en:"to taste; to prove"},
+
+  {w:"tirar",                    ipa:"тирáр",           ru:"вынимать, доставать; снимать",         en:"to take out / remove", alt:"retirar — формальнее"},
+  {w:"cair",                     ipa:"каи́р",           ru:"падать",                               en:"to fall"},
+  {w:"saltar",                   ipa:"салтáр",          ru:"прыгать",                              en:"to jump"},
+  {w:"andar",                    ipa:"андáр",           ru:"ходить (пешком); ездить (andar de)",   en:"to walk; go (by)"},
+  {w:"chegar",       prep:"a",   ipa:"шыгáр",           ru:"приходить, прибывать",                 en:"to arrive"},
+  {w:"passar",                   ipa:"пасáр",           ru:"проходить; проводить (время); гладить", en:"to pass; spend (time)"},
+  {w:"enviar",                   ipa:"энвиáр",          ru:"отправлять, посылать",                 en:"to send"},
+  {w:"encomendar",               ipa:"энкумэндáр",      ru:"заказывать (товар)",                   en:"to order (goods)"},
+  {w:"pedir",                    ipa:"пыди́р",          ru:"просить; заказывать (в кафе)",          en:"to ask for; order (food)"},
+  {w:"estacionar",               ipa:"штасьунáр",       ru:"парковать(ся)",                        en:"to park"},
+  {w:"tomar o pequeno-almoço",   ipa:"тумáр у пыкэ́ну алмóсу", ru:"завтракать",                     en:"to have breakfast"},
+  {w:"tomar um duche",           ipa:"тумáр ун душ",    ru:"принять душ",                          en:"to take a shower"},
+  {w:"tomar um comprimido",      ipa:"тумáр ун компримиду", ru:"принять таблетку",                 en:"to take a pill"},
+  {w:"preencher",                ipa:"прьеншэ́р",       ru:"заполнять (бланк, форму)",             en:"to fill in (a form)"},
+  {w:"pegar",        prep:"em",  ipa:"пыгáр",           ru:"брать, хватать (pegar em)",            en:"to grab / pick up"},
+  {w:"almoçar",                  ipa:"алмусáр",         ru:"обедать",                              en:"to have lunch"},
+  {w:"jantar",                   ipa:"жантáр",          ru:"ужинать",                              en:"to have dinner"},
+  {w:"começar",      prep:"a",   ipa:"кумысáр",         ru:"начинать (começar a + инф.)",          en:"to begin / start"},
+  {w:"acabar",       prep:"de",  ipa:"акабáр",          ru:"заканчивать; acabar de = только что",   en:"to finish; have just"},
+  {w:"comer",                    ipa:"кумэ́р",          ru:"есть, кушать",                         en:"to eat"},
+  {w:"beber",                    ipa:"быбэ́р",          ru:"пить",                                 en:"to drink"},
+  {w:"fazer",                    ipa:"фазэ́р",          ru:"делать",                               en:"to do / make"},
+  {w:"abrir",                    ipa:"абри́р",          ru:"открывать",                            en:"to open"},
+  {w:"fechar",                   ipa:"фышáр",           ru:"закрывать",                            en:"to close"},
+  {w:"chamar",                   ipa:"шамáр",           ru:"звать, называть (chamar-se — зваться)", en:"to call"},
+  {w:"ligar",        prep:"a/para", ipa:"лигáр",        ru:"звонить (по телефону); включать",      en:"to call; turn on"},
+  {w:"escrever",                 ipa:"шкрывэ́р",        ru:"писать",                               en:"to write"},
+  {w:"esperar",      prep:"por", ipa:"шпырáр",          ru:"ждать (esperar por); надеяться",       en:"to wait; to hope"},
+  {w:"aguardar",                 ipa:"агуардáр",        ru:"ожидать (формальнее esperar)",         en:"to await (formal)"},
+  {w:"aquecer",                  ipa:"акэсэ́р",         ru:"греть, нагревать",                     en:"to heat / warm up"},
+  {w:"arrefecer",                ipa:"аррыфысэ́р",      ru:"охлаждать(ся), остывать",              en:"to cool down"},
+  {w:"guardar",                  ipa:"гуардáр",         ru:"хранить; убирать на место",            en:"to keep / put away"},
+  {w:"segurar",                  ipa:"сыгурáр",         ru:"держать (в руках)",                    en:"to hold"},
+  {w:"recolher",                 ipa:"рыкульэ́р",       ru:"собирать, забирать",                   en:"to collect / gather"},
+  {w:"encontrar",                ipa:"энконтрáр",       ru:"находить; встречать",                  en:"to find; to meet"},
+  {w:"achar",                    ipa:"ашáр",            ru:"находить; считать, полагать (мнение)", en:"to find; to think"},
+  {w:"perder",                   ipa:"пырдэ́р",         ru:"терять; пропустить (транспорт)",       en:"to lose / miss"},
+  {w:"descansar",                ipa:"дышкансáр",       ru:"отдыхать",                             en:"to rest"},
+  {w:"pensar",       prep:"em",  ipa:"пэнсáр",          ru:"думать (pensar em — о чём-то)",        en:"to think"},
+  {w:"precisar",     prep:"de",  ipa:"прысизáр",        ru:"нуждаться, быть нужным (precisar de)", en:"to need"},
+  {w:"trabalhar",                ipa:"трабальáр",       ru:"работать",                             en:"to work"},
+  {w:"ficar",                    ipa:"фикáр",           ru:"оставаться; находиться; становиться",   en:"to stay; be located; become"},
+  {w:"mostrar",                  ipa:"муштрáр",         ru:"показывать",                           en:"to show"},
+  {w:"usar",                     ipa:"узáр",            ru:"использовать; носить (одежду)",        en:"to use; to wear"},
+  {w:"ter",                      ipa:"тэр",             ru:"иметь (неправильный)",                 en:"to have"},
+  {w:"lavar",                    ipa:"лавáр",           ru:"мыть, стирать (lavar-se — умываться)", en:"to wash"},
+  {w:"dar",                      ipa:"дар",             ru:"давать",                               en:"to give"},
+  {w:"dar de comer",  prep:"a",  ipa:"дар ды кумэ́р",    ru:"кормить (dar de comer à gata)",        en:"to feed"},
+  {w:"passear",                  ipa:"пасиáр",          ru:"гулять",                               en:"to stroll / walk"},
+  {w:"pagar",                    ipa:"пагáр",           ru:"платить (pagar em dinheiro — наличными)", en:"to pay"},
+  {w:"reservar",                 ipa:"рызырвáр",        ru:"бронировать",                          en:"to book / reserve"},
+  {w:"desligar",                 ipa:"дыжлигáр",        ru:"выключать; класть трубку",             en:"to turn off; hang up"},
+  {w:"levantar-se",              ipa:"лывантáр-сы",     ru:"вставать (без -se — поднимать)",       en:"to get up"},
+  {w:"ligar de volta",           ipa:"лигáр ды вóлта",  ru:"перезвонить (в ответ)",                en:"to call back"},
+  {w:"voltar a ligar",           ipa:"волтáр а лигáр",  ru:"позвонить ещё раз",                    en:"to call again"},
+];
+
+function buildCard(d, kind){
+  const el = document.createElement('div');
+  if(kind==='phrase'){
+    el.className='card phrase';
+    el.dataset.search=[d.pt,d.ipa,d.ru].join(' ').toLowerCase();
+    el.innerHTML = `
+      <div class="word">${d.pt}</div>
+      <div class="ipa">${d.ipa}</div>
+      <div class="tr"><div class="ru">${d.ru}</div></div>
+      <span class="spk">🔊</span>`;
+    el.addEventListener('click',()=>speak(d,el));
+    return el;
+  }
+  el.className='card';
+  el.dataset.search=[d.a||'',d.w,d.prep||'',d.ipa,d.ru,d.en,d.alt||''].join(' ').toLowerCase();
+  const head = kind==='verb'
+    ? `${d.w}${d.prep?' <span class="prep">('+d.prep+')</span>':''}`
+    : `${d.a} ${d.w}`;
+  const badges = kind==='verb'
+    ? '<span class="g v">v</span>'
+    : `${d.ex?'<span class="ex" title="Род нужно запомнить">!</span>':''}<span class="g ${d.g}">${d.g}</span>`;
+  el.innerHTML = `
+    <div class="top">
+      <div class="word">${head}</div>
+      <div class="badges">${badges}</div>
+    </div>
+    <div class="ipa">${d.ipa}</div>
+    <div class="tr">
+      <div class="ru">${d.ru}</div>
+      <div class="en">${d.en}${d.alt?' · <i>'+d.alt+'</i>':''}</div>
+    </div>
+    <span class="spk">🔊</span>`;
+  el.addEventListener('click',()=>speak(d,el));
+  return el;
+}
+
+const grid = document.getElementById('grid');
+WORDS.forEach(d=>grid.appendChild(buildCard(d,'noun')));
+const gridV = document.getElementById('grid-verbs');
+VERBS.forEach(d=>gridV.appendChild(buildCard(d,'verb')));
+
+const FRASES = [
+  {pt:"voltar às aulas", ipa:"волтáр аз áулаш", ru:"вернуться к занятиям"},
+  {pt:"voltar a comprar", ipa:"волтáр а компрáр", ru:"снова купить"},
+  {pt:"voltar para casa da escola", ipa:"волтáр пара кáза да шкóла", ru:"вернуться домой из школы"},
+  {pt:"voltar / regressar ao parque perto da casa de uma amiga", ipa:"волтáр / рыгрысáр ау пáрк пэрту да кáза ды ума амига", ru:"вернуться в парк возле дома подруги"},
+  {pt:"voltar a estudar", ipa:"волтáр а штудáр", ru:"вернуться к учёбе"},
+  {pt:"voltar / regressar da cidade à aldeia", ipa:"волтáр / рыгрысáр да сидáд а алдэйа", ru:"вернуться из города в деревню"},
+  {pt:"voltar / regressar ao trabalho das férias", ipa:"волтáр / рыгрысáр ау трабáлью даш фэ́риаш", ru:"вернуться на работу из отпуска"},
+  {pt:"voltar / regressar ao museu do parque", ipa:"волтáр / рыгрысáр ау музéу ду пáрк", ru:"вернуться в музей в парке"},
+
+  {pt:"deixar o livro na mesa", ipa:"дэйшáр у ливру на мéза", ru:"оставить книгу на столе"},
+  {pt:"deixar o saco na cozinha", ipa:"дэйшáр у сáку на кузиньа", ru:"оставить пакет на кухне"},
+  {pt:"deixar o carro no estacionamento", ipa:"дэйшáр у кáрру ну штасьунамéнту", ru:"оставить машину на парковке"},
+  {pt:"não deixar o telemóvel no sofá", ipa:"нау дэйшáр у тылымóвэл ну суфá", ru:"не оставлять телефон на диване"},
+  {pt:"deixar de comprar pão", ipa:"дэйшáр ды компрáр пáу", ru:"перестать покупать хлеб"},
+  {pt:"deixar de dançar na discoteca", ipa:"дэйшáр ды дансáр на дишкутэ́ка", ru:"перестать танцевать в клубе"},
+  {pt:"deixar a gata sair do roupeiro", ipa:"дэйшáр а гáта саи́р ду ройпэйру", ru:"выпустить кошку из шкафа"},
+  {pt:"deixar ver as fotos da festa", ipa:"дэйшáр вэр аш фóтуш да фэ́шта", ru:"дать посмотреть фото с вечеринки"},
+
+  {pt:"levar o livro para a escola", ipa:"лывáр у ливру пара а шкóла", ru:"взять книгу в школу"},
+  {pt:"levar a irmã ao cinema", ipa:"лывáр а ирмáн ау синэ́ма", ru:"сводить сестру в кино"},
+  {pt:"levar a gata ao veterinário", ipa:"лывáр а гáта ау вытыринáрью", ru:"отвезти кошку к ветеринару"},
+
+  {pt:"levantar dinheiro no banco", ipa:"лывантáр диньэйру ну бáнку", ru:"снять деньги в банке"},
+  {pt:"levantar a caixa e colocar na estante", ipa:"лывантáр а кáйша и кулукáр на штáнт", ru:"поднять коробку и поставить на стеллаж"},
+  {pt:"levantar a cabeça", ipa:"лывантáр а кабéса", ru:"поднять голову"},
+
+  {pt:"experimentar a roupa na loja", ipa:"эйшпырименьтáр а ройпа на лóжа", ru:"померить одежду в магазине"},
+  {pt:"experimentar comprar maçãs no mercado", ipa:"эйшпырименьтáр компрáр масáйш ну мыркáду", ru:"попробовать купить яблоки на рынке"},
+
+  {pt:"provar pastéis de nata em Lisboa", ipa:"прувáр паштэ́йш ды нáта эн лижбóа", ru:"попробовать паштел в Лиссабоне"},
+  {pt:"provar o café", ipa:"прувáр у кафэ́", ru:"попробовать кофе"},
+  {pt:"provar o pão da padaria", ipa:"прувáр у пáу да падари́а", ru:"попробовать хлеб из пекарни"},
+
+  {pt:"tirar a mesa do quarto", ipa:"тирáр а мéза ду куáрту", ru:"убрать стол из комнаты"},
+  {pt:"tirar o chapéu da cabeça", ipa:"тирáр у шапэ́у да кабéса", ru:"снять шапку с головы"},
+  {pt:"tirar uma foto", ipa:"тирáр ума фóту", ru:"сделать фото"},
+
+  {pt:"cair da cadeira", ipa:"каи́р да кадэйра", ru:"упасть со стула"},
+  {pt:"cair da prateleira", ipa:"каи́р да пратылэйра", ru:"упасть с полки"},
+
+  {pt:"saltar para a piscina", ipa:"салтáр пара а пишсина", ru:"прыгнуть в бассейн"},
+
+  {pt:"andar de autocarro à escola", ipa:"андáр ды аутукáрру а шкóла", ru:"ездить на автобусе в школу"},
+  {pt:"andar a pé para casa", ipa:"андáр а пэ пара кáза", ru:"идти пешком домой"},
+  {pt:"andar de carro ao trabalho", ipa:"андáр ды кáрру ау трабáлью", ru:"ездить на машине на работу"},
+  {pt:"como está a andar?", ipa:"кóму штá а андáр", ru:"как идут дела?"},
+
+  {pt:"chegar ao cinema do trabalho", ipa:"шыгáр ау синэ́ма ду трабáлью", ru:"прийти в кино с работы"},
+  {pt:"chegar à cidade de comboio", ipa:"шыгáр а сидáд ды комбóйу", ru:"приехать в город на поезде"},
+  {pt:"chegar à loja e comprar o pão", ipa:"шыгáр а лóжа и компрáр у пáу", ru:"дойти до магазина и купить хлеб"},
+
+  {pt:"passar pela cidade de carro", ipa:"пасáр пэла сидáд ды кáрру", ru:"проехать через город на машине"},
+  {pt:"passar a mensagem ao professor", ipa:"пасáр а мэнсáжень ау пруфысóр", ru:"передать сообщение учителю"},
+  {pt:"passar o tempo na praia", ipa:"пасáр у тэ́мпу на прáйа", ru:"провести время на пляже"},
+  {pt:"passar o fim de semana em casa", ipa:"пасáр у фин ды сымáна эн кáза", ru:"провести выходные дома"},
+
+  {pt:"enviar a mensagem ao marido", ipa:"энвиáр а мэнсáжень ау мариду", ru:"отправить сообщение мужу"},
+  {pt:"enviar o livro por correio", ipa:"энвиáр у ливру пур куррэйу", ru:"отправить книгу почтой"},
+  {pt:"enviar a informação por email", ipa:"энвиáр а инфурмасáу пур имэйл", ru:"отправить информацию по почте"},
+
+  {pt:"encomendar comida para casa", ipa:"энкумэндáр кумида пара кáза", ru:"заказать еду домой"},
+  {pt:"encomendar sapatos numa loja online", ipa:"энкумэндáр сапáтуш нума лóжа онлайн", ru:"заказать туфли в интернет-магазине"},
+  {pt:"encomendar uma cadeira para o escritório", ipa:"энкумэндáр ума кадэйра пара у шкритóрью", ru:"заказать стул в офис"},
+
+  {pt:"pedir um copo de água", ipa:"пыди́р ун кóпу ды áгуа", ru:"попросить стакан воды"},
+  {pt:"pedir um café e um pastel de nata", ipa:"пыди́р ун кафэ́ и ун паштэ́л ды нáта", ru:"заказать кофе и паштел"},
+  {pt:"pedir ajuda ao professor", ipa:"пыди́р ажýда ау пруфысóр", ru:"попросить помощи у учителя"},
+
+  {pt:"estacionar o carro na rua", ipa:"штасьунáр у кáрру на рýа", ru:"припарковать машину на улице"},
+  {pt:"estacionar perto da universidade", ipa:"штасьунáр пэрту да унивэрсидáд", ru:"припарковать у университета"},
+
+  {pt:"ir às compras à loja perto de casa", ipa:"ир аш кóмпраш а лóжа пэрту ды кáза", ru:"пойти за покупками в магазин возле дома"},
+  {pt:"ir à mata perto da aldeia", ipa:"ир а мáта пэрту да алдэйа", ru:"поехать в лес возле деревни"},
+  {pt:"ir ao cinema no centro comercial", ipa:"ир ау синэ́ма ну сéнтру кумырсиáл", ru:"поехать в кино в торговом центре"},
+
+  {pt:"ver as flores no jardim", ipa:"вэр аш флóрыш ну жардим", ru:"смотреть на цветы в саду"},
+  {pt:"ver a televisão na sala de estar", ipa:"вэр а тылывизáу на сáла ды штáр", ru:"смотреть телевизор в гостиной"},
+  {pt:"ver um apartamento para comprar", ipa:"вэр ун апартамéнту пара компрáр", ru:"смотреть квартиру для покупки"},
+  {pt:"ver a ementa no café", ipa:"вэр а эмéнта ну кафэ́", ru:"смотреть меню в кафе"},
+
+  {pt:"poder ver a televisão na sala de estar", ipa:"пудэ́р вэр а тылывизáу на сáла ды штáр", ru:"мочь посмотреть телевизор в гостиной"},
+  {pt:"poder colocar os garfos na gaveta", ipa:"пудэ́р кулукáр уш гáрфуш на гавéта", ru:"мочь положить вилки в ящик"},
+  {pt:"poder comprar a comida no supermercado", ipa:"пудэ́р компрáр а кумида ну супырмыркáду", ru:"мочь купить еду в супермаркете"},
+  {pt:"poder devolver o livro à papelaria", ipa:"пудэ́р дыволвэ́р у ливру а папылари́а", ru:"мочь вернуть книгу в магазин"},
+  {pt:"poder vender o carro na cidade", ipa:"пудэ́р вэндэ́р у кáрру на сидáд", ru:"мочь продать машину в городе"},
+  {pt:"poder trazer as nêsperas do frigorífico", ipa:"пудэ́р тразэ́р аш нэ́шпыраш ду фригурифику", ru:"мочь принести мушмулу из холодильника"},
+  {pt:"poder dançar na rua", ipa:"пудэ́р дансáр на рýа", ru:"мочь танцевать на улице"},
+
+  {pt:"parar de falar no cinema", ipa:"парáр ды фалáр ну синэ́ма", ru:"перестать говорить в кино"},
+
+  {pt:"sair à rua", ipa:"саи́р а рýа", ru:"выйти на улицу"},
+  {pt:"sair da piscina", ipa:"саи́р да пишсина", ru:"выйти из бассейна"},
+
+  {pt:"entrar na cozinha", ipa:"энтрáр на кузиньа", ru:"зайти на кухню"},
+  {pt:"entrar no centro comercial, na pastelaria", ipa:"энтрáр ну сéнтру кумырсиáл, на паштылари́а", ru:"зайти в торговый центр, в кондитерскую"},
+  {pt:"entrar na loja da aldeia", ipa:"энтрáр на лóжа да алдэйа", ru:"зайти в магазин в деревне"},
+  {pt:"entrar no restaurante perto do parque", ipa:"энтрáр ну рыштаурáнт пэрту ду пáрк", ru:"зайти в ресторан рядом с парком"},
+  {pt:"entrar na escola para falar com o professor", ipa:"энтрáр на шкóла пара фалáр кон у пруфысóр", ru:"зайти в школу поговорить с учителем"},
+
+  {pt:"colocar o livro na prateleira", ipa:"кулукáр у ливру на пратылэйра", ru:"положить книгу на полку"},
+  {pt:"colocar as colheres no cesto", ipa:"кулукáр аш кульэ́рыш ну сéшту", ru:"положить ложки в корзину"},
+  {pt:"colocar os garfos na gaveta da cozinha", ipa:"кулукáр уш гáрфуш на гавéта да кузиньа", ru:"положить вилки в ящик на кухне"},
+  {pt:"colocar as nêsperas no saco", ipa:"кулукáр аш нэ́шпыраш ну сáку", ru:"положить мушмулу в пакет"},
+
+  {pt:"pôr os sapatos na estante no quarto", ipa:"пор уш сапáтуш на штáнт ну куáрту", ru:"поставить обувь на стеллаж в спальне"},
+  {pt:"pôr o prato na mesa na cozinha", ipa:"пор у прáту на мéза на кузиньа", ru:"поставить тарелку на стол на кухне"},
+  {pt:"pôr a blusa no roupeiro", ipa:"пор а блуза ну ройпэйру", ru:"повесить блузку в шкаф"},
+  {pt:"pôr o quadro na parede", ipa:"пор у куáдру на парéд", ru:"повесить картину на стену"},
+  {pt:"pôr as roupas no armário", ipa:"пор аш ройпаш ну армáрью", ru:"повесить одежду в шкаф"},
+  {pt:"pôr os óculos", ipa:"пор уз óкулуш", ru:"надеть очки"},
+
+  {pt:"devolver os sapatos na loja", ipa:"дыволвэ́р уш сапáтуш на лóжа", ru:"вернуть обувь в магазин"},
+  {pt:"devolver o livro à biblioteca", ipa:"дыволвэ́р у ливру а библьютэ́ка", ru:"вернуть книгу в библиотеку"},
+  {pt:"devolver a cadeira ao vizinho", ipa:"дыволвэ́р а кадэйра ау визиньу", ru:"вернуть стул соседу"},
+
+  {pt:"falar na cozinha à mesa", ipa:"фалáр на кузиньа а мéза", ru:"говорить на кухне за столом"},
+
+  {pt:"andar a pé pela praia", ipa:"андáр а пэ пэ́ла прáйа", ru:"гулять пешком по пляжу"},
+  {pt:"andar a pé na praia", ipa:"андáр а пэ на прáйа", ru:"гулять пешком на пляже"},
+  {pt:"andar de bicicleta no parque", ipa:"андáр ды бисиклéта ну пáрк", ru:"ездить на велосипеде в парке"},
+  {pt:"provar comida nova no café", ipa:"прувáр кумида нóва ну кафэ́", ru:"пробовать новую еду в кафе"},
+  {pt:"falar com o marido", ipa:"фалáр кон у мариду", ru:"разговаривать с мужем"},
+  {pt:"voltar para casa das férias", ipa:"волтáр пара кáза даш фэ́риаш", ru:"вернуться домой из отпуска"},
+  {pt:"voltar a casa depois das férias", ipa:"волтáр а кáза дыпóйж даш фэ́риаш", ru:"вернуться домой после отпуска"},
+  {pt:"ir ao ginásio de manhã", ipa:"ир ау жинáзью ды маньáн", ru:"ходить в спортзал утром"},
+  {pt:"dançar nas festas", ipa:"дансáр наш фэ́шташ", ru:"танцевать на вечеринках"},
+  {pt:"pôr comida à gata", ipa:"пор кумида а гáта", ru:"насыпать еды кошке (покормить)"},
+  {pt:"dar de comer à gata", ipa:"дар ды кумэ́р а гáта", ru:"покормить кошку"},
+  {pt:"trabalhar à secretária", ipa:"трабальáр а сыкретáрья", ru:"работать за письменным столом"},
+  {pt:"pedir um café", ipa:"пыди́р ун кафэ́", ru:"заказать кофе (в кафе)"},
+  {pt:"pedir a sobremesa", ipa:"пыди́р а субрымéза", ru:"заказать десерт"},
+  {pt:"tomar o pequeno-almoço na varanda", ipa:"тумáр у пыкэ́ну алмóсу на варáнда", ru:"завтракать на балконе / террасе"},
+  {pt:"tomar o pequeno-almoço na esplanada", ipa:"тумáр у пыкэ́ну алмóсу на шпланáда", ru:"завтракать на террасе кафе"},
+  {pt:"ligar para as organizações", ipa:"лигáр пара аз организасóйнш", ru:"звонить в организации"},
+  {pt:"escrever à universidade", ipa:"шкрывэ́р а унивэрсидáд", ru:"писать в университет"},
+  {pt:"estacionar no estacionamento do supermercado", ipa:"штасьунáр ну штасьунамéнту ду супырмыркáду", ru:"припарковаться на парковке супермаркета"},
+  {pt:"preencher os formulários", ipa:"прьеншэ́р уш фурмулáрьюш", ru:"заполнять формы"},
+  {pt:"esperar na fila da loja", ipa:"шпырáр на фила да лóжа", ru:"ждать в очереди в магазине"},
+  {pt:"esperar pelo autocarro", ipa:"шпырáр пэлу аутукáрру", ru:"ждать автобус"},
+  {pt:"levantar-se às sete", ipa:"лывантáр-сы аш сэт", ru:"вставать в семь"},
+  {pt:"ligar a televisão", ipa:"лигáр а тылывизáу", ru:"включить телевизор"},
+  {pt:"abrir a janela", ipa:"абри́р а жанéла", ru:"открыть окно"},
+  {pt:"trazer a conta", ipa:"тразэ́р а кóнта", ru:"принести счёт"},
+  {pt:"experimentar o anel na loja", ipa:"эйшпырименьтáр у анэ́л на лóжа", ru:"примерить кольцо в магазине"},
+  {pt:"tirar o anel", ipa:"тирáр у анэ́л", ru:"снять кольцо"},
+  {pt:"Pode ligar-me de volta, por favor?", ipa:"пóд лигáр-мы ды вóлта, пур фавóр", ru:"Можете мне перезвонить, пожалуйста?"},
+];
+
+const PARES = [
+  {pt:"o café e o chá", ipa:"у кафэ́ и у ша", ru:"кофе и чай"},
+  {pt:"o professor e o aluno", ipa:"у пруфысóр и у алуну", ru:"учитель и ученик"},
+  {pt:"o sal, o açúcar e a pimenta", ipa:"у сал, у асýкар и а пимéнта", ru:"соль, сахар и перец"},
+  {pt:"a escola e a universidade", ipa:"а шкóла и а унивэрсидáд", ru:"школа и университет"},
+  {pt:"a aldeia e a cidade", ipa:"а алдэйа и а сидáд", ru:"деревня и город"},
+  {pt:"o sumo e a água", ipa:"у суму и а áгуа", ru:"сок и вода"},
+  {pt:"a banheira e o quarto", ipa:"а баньэйра и у куáрту", ru:"ванна и спальня"},
+  {pt:"a entrada e a saída", ipa:"а энтрáда и а саи́да", ru:"вход и выход"},
+  {pt:"o mercado e o estacionamento", ipa:"у мыркáду и у штасьунамéнту", ru:"рынок и парковка"},
+  {pt:"a casa e o jardim", ipa:"а кáза и у жардим", ru:"дом и сад"},
+  {pt:"o gato e o cão", ipa:"у гáту и у кáу", ru:"кот и пёс"},
+  {pt:"o armário e a cama", ipa:"у армáрью и а кáма", ru:"шкаф и кровать"},
+  {pt:"a piscina e a escola", ipa:"а пишсина и а шкóла", ru:"бассейн и школа"},
+  {pt:"o supermercado e o estacionamento", ipa:"у супырмыркáду и у штасьунамéнту", ru:"супермаркет и парковка"},
+  {pt:"o queijo e o pão", ipa:"у кэйжу и у пáу", ru:"сыр и хлеб"},
+  {pt:"a cozinha e o frigorífico", ipa:"а кузиньа и у фригурифику", ru:"кухня и холодильник"},
+  {pt:"o papel, o lápis e a caneta", ipa:"у папэ́л, у лáпиш и а канэ́та", ru:"бумага, карандаш и ручка"},
+  {pt:"a faca, o garfo e a colher", ipa:"а фáка, у гáрфу и а кульэ́р", ru:"нож, вилка и ложка"},
+  {pt:"o vinho e o azeite", ipa:"у виньу и у азэйт", ru:"вино и оливковое масло"},
+  {pt:"a cor e a flor", ipa:"а кор и а флор", ru:"цвет и цветок"},
+  {pt:"o computador, o telefone e a televisão", ipa:"у компутадóр, у тылыфóн и а тылывизáу", ru:"компьютер, телефон и телевизор"},
+  {pt:"o cinema e o correio", ipa:"у синэ́ма и у куррэйу", ru:"кинотеатр и почта"},
+  {pt:"o prato e o garfo", ipa:"у прáту и у гáрфу", ru:"тарелка и вилка"},
+  {pt:"o comboio e o avião", ipa:"у комбóйу и у авьáу", ru:"поезд и самолёт"},
+  {pt:"a parede e a janela", ipa:"а парéд и а жанéла", ru:"стена и окно"},
+  {pt:"a mesa e a cadeira", ipa:"а мéза и а кадэйра", ru:"стол и стул"},
+  {pt:"o frigorífico e a comida", ipa:"у фригурифику и а кумида", ru:"холодильник и еда"},
+  {pt:"o restaurante e o café", ipa:"у рыштаурáнт и у кафэ́", ru:"ресторан и кафе"},
+  {pt:"a estrela e o encontro", ipa:"а штрэ́ла и у энкóнтру", ru:"звезда и встреча"},
+  {pt:"a estrela e o sol", ipa:"а штрэ́ла и у сол", ru:"звезда и солнце"},
+  {pt:"a estrela e a televisão", ipa:"а штрэ́ла и а тылывизáу", ru:"звезда и телевизор"},
+  {pt:"a flor e a mulher", ipa:"а флор и а мульэ́р", ru:"цветок и женщина"},
+  {pt:"a hora e o horário", ipa:"а óра и у урáрью", ru:"час и расписание"},
+];
+
+const gridF = document.getElementById('grid-frases');
+FRASES.forEach(d=>gridF.appendChild(buildCard(d,'phrase')));
+const gridP = document.getElementById('grid-pares');
+PARES.forEach(d=>gridP.appendChild(buildCard(d,'phrase')));
+
+const PEDIDOS = [
+  {pt:"posso esperar aqui dentro", ipa:"пóсу шпырáр акú дэ́нтру", ru:"я могу подождать здесь, внутри"},
+  {pt:"posso levantar a encomenda hoje", ipa:"пóсу лывантáр а энкумэ́нда óж", ru:"я могу забрать посылку сегодня"},
+  {pt:"posso abrir a janela", ipa:"пóсу абри́р а жанéла", ru:"я могу открыть окно"},
+  {pt:"posso experimentar a saia", ipa:"пóсу эйшпырименьтáр а сáйа", ru:"я могу примерить юбку"},
+  {pt:"posso experimentar as calças de ganga", ipa:"пóсу эйшпырименьтáр аш кáлсаш ды гáнга", ru:"я могу примерить джинсы"},
+  {pt:"posso experimentar isto", ipa:"пóсу эйшпырименьтáр ишту", ru:"я могу примерить это"},
+  {pt:"posso pagar em dinheiro", ipa:"пóсу пагáр эн диньэйру", ru:"я могу заплатить наличными"},
+  {pt:"posso reservar uma mesa para hoje", ipa:"пóсу рызырвáр ума мéза пара óж", ru:"я могу забронировать столик на сегодня"},
+  {pt:"posso trazer uma amiga", ipa:"пóсу тразэ́р ума амига", ru:"я могу привести подругу"},
+  {pt:"posso usar a casa de banho", ipa:"пóсу узáр а кáза ды баньу", ru:"я могу воспользоваться туалетом"},
+  {pt:"posso provar", ipa:"пóсу прувáр", ru:"я могу попробовать"},
+
+  {pt:"podes ficar em casa", ipa:"пóдыш фикáр эн кáза", ru:"ты можешь остаться дома"},
+  {pt:"podes comprar café e chá", ipa:"пóдыш компрáр кафэ́ и ша", ru:"ты можешь купить кофе и чай"},
+  {pt:"podes ligar de volta amanhã", ipa:"пóдыш лигáр ды вóлта аманьáн", ru:"ты можешь перезвонить завтра"},
+  {pt:"podes provar a sobremesa", ipa:"пóдыш прувáр а субрымéза", ru:"ты можешь попробовать десерт"},
+  {pt:"podes usar o anel", ipa:"пóдыш узáр у анэ́л", ru:"ты можешь носить (надеть) кольцо"},
+  {pt:"podes deixar a faca na mesa", ipa:"пóдыш дэйшáр а фáка на мéза", ru:"ты можешь оставить нож на столе"},
+  {pt:"podes preencher os documentos amanhã", ipa:"пóдыш прьеншэ́р уж дукумэ́нтуш аманьáн", ru:"ты можешь заполнить документы завтра"},
+  {pt:"podes comprar um bilhete de comboio", ipa:"пóдыш компрáр ун бильéт ды комбóйу", ru:"ты можешь купить билет на поезд"},
+  {pt:"podes trazer as compras do carro", ipa:"пóдыш тразэ́р аш кóмпраш ду кáрру", ru:"ты можешь принести покупки из машины"},
+];
+
+const gridPed = document.getElementById('grid-pedidos');
+PEDIDOS.forEach(d=>gridPed.appendChild(buildCard(d,'phrase')));
+
+/* ---- Speech ---- */
+const rateEl = document.getElementById('rate');
+const voiceSel = document.getElementById('voice');
+let voices = [];
+let chosen = null;
+
+function loadVoices(){
+  const all = speechSynthesis.getVoices();
+  if(!all.length) return; // not ready yet — onvoiceschanged will fire again
+  voices = all.filter(v=>/^pt/i.test(v.lang));
+  voiceSel.innerHTML='';
+  const bar = document.getElementById('warnbar');
+  if(!voices.length){
+    bar.style.display='block';
+    bar.textContent=
+      'В браузере не найден португальский голос. В Safari/Chrome он обычно есть; на macOS добавьте голос в System Settings → Accessibility → Spoken Content → System Voice (Joana, pt-PT).';
+    return;
+  }
+  bar.style.display='none';
+  // prefer European Portuguese
+  voices.sort((a,b)=> (/pt[-_]PT/i.test(b.lang)-/pt[-_]PT/i.test(a.lang)));
+  voices.forEach((v,i)=>{
+    const o=document.createElement('option');
+    o.value=i; o.textContent=`${v.name} (${v.lang})`;
+    voiceSel.appendChild(o);
+  });
+  chosen = voices[0];
+}
+voiceSel.addEventListener('change',()=>chosen=voices[voiceSel.value]);
+speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+function speak(d,el){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const text = d.say || d.pt || [d.a,d.w].filter(Boolean).join(' ');
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = chosen ? chosen.lang : 'pt-PT';
+  if(chosen) u.voice = chosen;
+  u.rate = parseFloat(rateEl.value);
+  document.querySelectorAll('.card.speaking').forEach(c=>c.classList.remove('speaking'));
+  el.classList.add('speaking');
+  u.onend = ()=>el.classList.remove('speaking');
+  u.onerror = ()=>el.classList.remove('speaking');
+  speechSynthesis.speak(u);
+}
+
+/* ---- Training mode: hide translations ---- */
+document.getElementById('toggle').addEventListener('change',e=>{
+  document.body.classList.toggle('hide-tr', !e.target.checked);
+});
+
+/* ---- Search / filter ---- */
+const search = document.getElementById('search');
+const empty = document.getElementById('empty');
+const sections = [['grid','head-sub'],['grid-verbs','head-verbs'],['grid-frases','head-frases'],['grid-pares','head-pares'],['grid-pedidos','head-pedidos']];
+search.addEventListener('input',()=>{
+  const q = search.value.trim().toLowerCase();
+  let total = 0;
+  sections.forEach(([gid,hid])=>{
+    let shown = 0;
+    document.getElementById(gid).querySelectorAll('.card').forEach(c=>{
+      const hit = !q || c.dataset.search.includes(q);
+      c.classList.toggle('hidden', !hit);
+      if(hit) shown++;
+    });
+    document.getElementById(hid).style.display = shown ? '' : 'none';
+    total += shown;
+  });
+  empty.style.display = total ? 'none' : 'block';
+});
+</script>
+<script src="quiz.js"></script>
