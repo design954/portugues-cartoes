@@ -1,5 +1,6 @@
-/* Daily review ("Hoje") — spaced repetition over the cards defined in index.html.
-   Reads the global arrays WORDS, VERBS, FRASES, PARES (whichever exist) and reuses
+/* Daily review ("Hoje") — spaced repetition over the cards defined in index.html,
+   plus section tabs and "Practice" (10 cards: PT→RU round, then RU→PT round, no effect on Hoje).
+   Reads the global arrays WORDS, VERBS, FRASES, PARES, PEDIDOS (whichever exist) and reuses
    the page's voice (`chosen`) and speed slider (`rateEl`). Progress lives in localStorage. */
 (function(){
   const KEY = 'pt-srs-v1';
@@ -62,7 +63,7 @@
   .qz-x{font:inherit;font-size:22px;line-height:1;background:none;border:0;color:var(--muted);cursor:pointer;padding:6px 8px;border-radius:8px}
   .qz-bar{flex:1;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
   .qz-bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
-  .qz-count{font-size:13px;color:var(--muted);min-width:44px;text-align:right}
+  .qz-count{font-size:13px;color:var(--muted);min-width:44px;text-align:right;white-space:nowrap}
   .qz-body{flex:1;display:flex;flex-direction:column;justify-content:center;max-width:560px;width:100%;margin:0 auto}
   .qz-card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);
     padding:28px 22px;text-align:center;min-height:260px;display:flex;flex-direction:column;justify-content:center;gap:10px}
@@ -94,6 +95,19 @@
     background:var(--card);color:var(--ink);cursor:pointer}
   .qz-set{display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:center;align-items:center;font-size:13px;color:var(--muted);margin-top:18px}
   .qz-set label{display:flex;align-items:center;gap:6px}
+  .tabs{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;
+    margin:0 -16px 8px;padding:10px 0 10px 16px;background:var(--bg);border-bottom:1px solid var(--line)}
+  .tabs-scroll{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-right:16px;min-width:0}
+  .tabs-scroll::-webkit-scrollbar{display:none}
+  .tab{font:inherit;font-size:13px;font-weight:600;white-space:nowrap;padding:7px 12px;border-radius:999px;
+    border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;flex-shrink:0}
+  .tab .c{font-weight:500;opacity:.7;margin-left:4px}
+  .tab[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .tab:focus-visible,.prac-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .prac-btn{font:inherit;font-size:13px;font-weight:600;white-space:nowrap;padding:7px 14px;border-radius:999px;
+    border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;flex-shrink:0}
+  .tabs .sep{width:1px;align-self:stretch;background:var(--line);flex-shrink:0}
+  .tab-off{display:none!important}
   `;
   document.head.appendChild(css);
 
@@ -120,6 +134,45 @@
   const $body = qz.querySelector('.qz-body'), $act = qz.querySelector('.qz-actions');
   const $bar = qz.querySelector('.qz-bar i'), $count = qz.querySelector('.qz-count');
 
+  /* ---- Section tabs ---- */
+  const TABS = [
+    {kind:'all',    label:'All'},
+    {kind:'noun',   label:'Substantivos', grid:'grid',         head:'head-sub'},
+    {kind:'verb',   label:'Verbos',       grid:'grid-verbs',   head:'head-verbs'},
+    {kind:'phrase', label:'Frases',       grid:'grid-frases',  head:'head-frases'},
+    {kind:'pair',   label:'Pares',        grid:'grid-pares',   head:'head-pares'},
+    {kind:'ask',    label:'Posso / podes',grid:'grid-pedidos', head:'head-pedidos'},
+  ].filter(t=>t.kind==='all' || document.getElementById(t.grid));
+  let tab = 'all';
+  try{ const t = localStorage.getItem('pt-tab'); if(TABS.some(x=>x.kind===t)) tab = t; }catch(e){}
+
+  const bar = document.createElement('div');
+  bar.className = 'tabs';
+  bar.setAttribute('role','toolbar');
+  bar.setAttribute('aria-label','Sections');
+  const counts = {}; collect().forEach(c=>counts[c.kind]=(counts[c.kind]||0)+1);
+  bar.innerHTML = `<button class="prac-btn" type="button">▶ Practice</button><span class="sep"></span><div class="tabs-scroll">` +
+    TABS.map(t=>`<button class="tab" type="button" data-kind="${t.kind}">${t.label}${t.kind==='all'?'':`<span class="c">${counts[t.kind]||0}</span>`}</button>`).join('') + `</div>`;
+  const hdr = document.querySelector('header');
+  hdr.parentNode.insertBefore(bar, hdr.nextSibling);
+
+  function setTab(kind){
+    tab = kind;
+    try{ localStorage.setItem('pt-tab', kind); }catch(e){}
+    bar.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-pressed', b.dataset.kind===kind));
+    TABS.forEach(t=>{
+      if(t.kind==='all') return;
+      const off = kind!=='all' && kind!==t.kind;
+      [t.grid,t.head].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.toggle('tab-off', off); });
+    });
+  }
+  bar.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+    setTab(b.dataset.kind);
+    const top = bar.getBoundingClientRect().top + scrollY;
+    if(scrollY > top) scrollTo({top});
+  }));
+  setTab(tab);
+
   function refreshBtn(){
     const all = collect();
     const n = Math.min(dueCards(all).length, MAX_DUE) + Math.min(newCards(all).length, state.perDay);
@@ -141,8 +194,28 @@
 
   /* ---- Session ---- */
   let queue = [], pos = 0, total = 0, failed = new Set(), stats = {yes:0,no:0};
+  const PRACTICE_SIZE = 10;
+  let mode = 'hoje', round = 1, picked = [], roundStats = [];
+
+  function open(){ qz.classList.add('open'); document.body.classList.add('qz-lock'); }
+
+  function practice(){
+    mode = 'practice';
+    const all = collect().filter(c=>tab==='all' || c.kind===tab);
+    picked = shuffle(all).slice(0, PRACTICE_SIZE);
+    roundStats = [];
+    open();
+    startRound(1);
+  }
+  function startRound(r){
+    round = r;
+    queue = shuffle(picked.map(c=>({...c, reverse: r===2})));
+    pos = 0; total = queue.length; failed = new Set(); stats = {yes:0,no:0};
+    queue.length ? showCard() : showPracticeDone();
+  }
 
   function start(extraNew){
+    mode = 'hoje';
     const all = collect();
     const due = dueCards(all).slice(0, MAX_DUE);
     const fresh = shuffle(newCards(all)).slice(0, extraNew ?? state.perDay);
@@ -151,7 +224,7 @@
       return {...c, reverse: box>=2 && Math.random()<.4};
     });
     pos = 0; total = queue.length; failed = new Set(); stats = {yes:0,no:0};
-    qz.classList.add('open'); document.body.classList.add('qz-lock');
+    open();
     queue.length ? showCard() : showDone(true);
   }
 
@@ -163,7 +236,8 @@
 
   function progress(){
     $bar.style.width = total ? `${Math.min(100, Math.round(pos/queue.length*100))}%` : '100%';
-    $count.textContent = queue.length ? `${Math.min(pos+1, queue.length)} / ${queue.length}` : '';
+    const n = queue.length ? `${Math.min(pos+1, queue.length)} / ${queue.length}` : '';
+    $count.textContent = mode==='practice' ? `${round===1?'PT → RU':'RU → PT'} · ${n}` : n;
   }
 
   function showCard(){
@@ -200,6 +274,14 @@
 
   function answer(ok){
     const c = queue[pos];
+    if(mode==='practice'){
+      ok ? stats.yes++ : stats.no++;
+      if(!ok && !failed.has(c.id)){ failed.add(c.id); queue.push({...c}); }
+      pos++;
+      if(pos < queue.length) return showCard();
+      roundStats[round-1] = {...stats, first: total - failed.size};
+      return round===1 ? showRoundBreak() : showPracticeDone();
+    }
     const s = state.cards[c.id] || {box:0, due:today()};
     if(ok){
       stats.yes++;
@@ -256,6 +338,37 @@
     $body.querySelector('[data-import]').addEventListener('click', importProgress);
   }
 
+  const tabLabel = () => (TABS.find(t=>t.kind===tab)||TABS[0]).label;
+
+  function showRoundBreak(){
+    $bar.style.width = '100%'; $count.textContent = '';
+    const r = roundStats[0];
+    $body.innerHTML = `<div class="qz-done">
+      <h2>Round 1 done</h2>
+      <p>PT → RU: ${r.first} of ${total} right first time</p>
+      <p>Now the same ${total} the other way: RU → PT.</p>
+    </div>`;
+    $act.innerHTML = `<button class="qz-yes" type="button">Start round 2</button>`;
+    $act.firstChild.addEventListener('click', ()=>startRound(2));
+    $act.firstChild.focus({preventScroll:true});
+  }
+
+  function showPracticeDone(){
+    $bar.style.width = '100%'; $count.textContent = '';
+    const [a,b] = roundStats;
+    const n = picked.length;
+    $body.innerHTML = n ? `<div class="qz-done">
+      <h2>Practice done</h2>
+      <p>${tabLabel()} · ${n} cards</p>
+      <p>PT → RU: ${a.first} of ${n} right first time<br>RU → PT: ${b.first} of ${n} right first time</p>
+      <div class="qz-row"><button class="qz-sec" type="button" data-again>10 more from ${tabLabel()}</button></div>
+    </div>` : `<div class="qz-done"><h2>No cards here yet</h2></div>`;
+    $act.innerHTML = `<button class="qz-show" type="button">Close</button>`;
+    $act.firstChild.addEventListener('click', close);
+    const again = $body.querySelector('[data-again]');
+    if(again) again.addEventListener('click', practice);
+  }
+
   /* ---- Export / import ---- */
   function exportProgress(){
     const blob = new Blob([JSON.stringify(state, null, 1)], {type:'application/json'});
@@ -281,6 +394,7 @@
 
   /* ---- Wiring ---- */
   btn.addEventListener('click', ()=>start());
+  bar.querySelector('.prac-btn').addEventListener('click', practice);
   qz.querySelector('.qz-x').addEventListener('click', close);
   document.addEventListener('keydown', e=>{
     if(!qz.classList.contains('open') || e.target.tagName==='SELECT') return;
