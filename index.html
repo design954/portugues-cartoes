@@ -98,6 +98,10 @@
   <div class="grid" id="grid-pares"></div>
   <h2 class="section" id="head-pedidos">Posso / podes · я могу / ты можешь</h2>
   <div class="grid" id="grid-pedidos"></div>
+  <h2 class="section" id="head-oracoes">Orações · предложения</h2>
+  <div class="grid" id="grid-oracoes"></div>
+  <h2 class="section" id="head-licao4">Lição 4 · фразы</h2>
+  <div class="grid" id="grid-licao4"></div>
   <div class="empty" id="empty">Ничего не найдено.</div>
 </div>
 
@@ -570,7 +574,6 @@ const FRASES = [
   {pt:"dizer obrigada ao professor", ipa:"дизэ́р обригáда ау пруфысóр", ru:"сказать спасибо учителю"},
   {pt:"dizer a hora à amiga", ipa:"дизэ́р а óра а амига", ru:"сказать подруге, который час"},
   {pt:"dizer ao marido que vou à loja", ipa:"дизэ́р ау мариду кы вóу а лóжа", ru:"сказать мужу, что я иду в магазин"},
-  {pt:"aguardar na fila", ipa:"агуардáр на фила", ru:"ожидать в очереди"},
   {pt:"aguardar a resposta por email", ipa:"агуардáр а рышпóшта пур имэйл", ru:"ожидать ответа по почте"},
   {pt:"aguardar a encomenda", ipa:"агуардáр а энкумэ́нда", ru:"ожидать посылку"},
   {pt:"aguardar o médico na sala de espera", ipa:"агуардáр у мэ́дику на сáла ды шпэ́ра", ru:"ожидать врача в приёмной"},
@@ -672,6 +675,10 @@ const FRASES = [
   {pt:"reservar uma mesa no restaurante", ipa:"рызырвáр ума мéза ну рыштаурáнт", ru:"забронировать столик в ресторане"},
   {pt:"reservar um bilhete de comboio", ipa:"рызырвáр ун бильéт ды комбóйу", ru:"забронировать билет на поезд"},
   {pt:"reservar um quarto no hotel", ipa:"рызырвáр ун куáрту ну отэ́л", ru:"забронировать номер в отеле"},
+  {pt:"ir de férias para o Algarve", ipa:"ир ды фэ́риаш пара у алгáрв", ru:"поехать в отпуск в Алгарве"},
+  {pt:"ir de férias com o marido", ipa:"ир ды фэ́риаш кон у мариду", ru:"поехать в отпуск с мужем"},
+  {pt:"voltar a ligar mais tarde", ipa:"волтáр а лигáр майш тард", ru:"перезвонить позже"},
+  {pt:"voltar a ligar ao médico amanhã", ipa:"волтáр а лигáр ау мэ́дику аманьáн", ru:"снова позвонить врачу завтра"},
 ];
 
 const PARES = [
@@ -742,6 +749,84 @@ const PEDIDOS = [
 const gridPed = document.getElementById('grid-pedidos');
 PEDIDOS.forEach(d=>gridPed.appendChild(buildCard(d,'phrase')));
 
+const ORACOES = [
+  {pt:"O Pedro pode entrar.", ipa:"у пéдру пóд энтрáр", ru:"Педру может войти."},
+  {pt:"O carro pode parar aqui.", ipa:"у кáрру пóд парáр акú", ru:"Машина может остановиться здесь."},
+  {pt:"Ela pode chamar o médico agora mesmo.", ipa:"эла пóд шамáр у мэ́дику агóра мéжму", ru:"Она может вызвать врача прямо сейчас."},
+  {pt:"A irmã pode fechar a porta.", ipa:"а ирмáн пóд фышáр а пóрта", ru:"Сестра может закрыть дверь."},
+  {pt:"O Cristiano pode usar a faca e o garfo.", ipa:"у криштиáну пóд узáр а фáка и у гáрфу", ru:"Криштиану может пользоваться ножом и вилкой."},
+  {pt:"A filha pode trazer uma garrafa de água.", ipa:"а филья пóд тразэ́р ума гарráфа ды áгуа", ru:"Дочь может принести бутылку воды."},
+  {pt:"O filho pode ir às compras hoje.", ipa:"у филью пóд ир аш кóмпраш óж", ru:"Сын может сходить за покупками сегодня."},
+  {pt:"A Luz pode voltar às três.", ipa:"а луш пóд волтáр аш трэш", ru:"Луш может вернуться в три."},
+  {pt:"O António pode vender o carro.", ipa:"у антóнью пóд вэндэ́р у кáрру", ru:"Антониу может продать машину."},
+  {pt:"O namorado pode fazer chá.", ipa:"у намурáду пóд фазэ́р ша", ru:"Парень может заварить чай."},
+  {pt:"O cliente pode ligar-me mais tarde.", ipa:"у клиэ́нт пóд лигáр-мы майш тард", ru:"Клиент может перезвонить мне позже."},
+  {pt:"A vizinha pode estacionar na rua.", ipa:"а визинья пóд штасьунáр на рýа", ru:"Соседка может припарковаться на улице."},
+  {pt:"Nós podemos encomendar online.", ipa:"нош пудэ́муш энкумэндáр онлайн", ru:"Мы можем заказать онлайн."},
+  {pt:"Nós podemos experimentar ioga.", ipa:"нош пудэ́муш эйшпырименьтáр иóга", ru:"Мы можем попробовать йогу."},
+  {pt:"Nós podemos esperar na fila.", ipa:"нош пудэ́муш шпырáр на фила", ru:"Мы можем подождать в очереди."},
+  {pt:"O marido e eu podemos sair hoje à noite.", ipa:"у мариду и эу пудэ́муш саи́р óж а нóйт", ru:"Мы с мужем можем сходить куда-нибудь сегодня вечером."},
+  {pt:"O amigo e eu podemos ir ao cinema.", ipa:"у амигу и эу пудэ́муш ир ау синэ́ма", ru:"Мы с другом можем пойти в кино."},
+  {pt:"Os clientes e eu podemos jantar no restaurante.", ipa:"уш клиэ́нтыш и эу пудэ́муш жантáр ну рыштаурáнт", ru:"Мы с клиентами можем поужинать в ресторане."},
+  {pt:"Nós podemos reservar uma mesa para amanhã.", ipa:"нош пудэ́муш рызырвáр ума мéза пара аманьáн", ru:"Мы можем забронировать столик на завтра."},
+  {pt:"Nós podemos falar com o gestor.", ipa:"нош пудэ́муш фалáр кон у жыштóр", ru:"Мы можем поговорить с менеджером."},
+  {pt:"Nós podemos experimentar os brincos.", ipa:"нош пудэ́муш эйшпырименьтáр уж бри́нкуш", ru:"Мы можем примерить серьги."},
+  {pt:"Eles podem trabalhar no escritório.", ipa:"элыш пóдэнь трабальáр ну шкритóрью", ru:"Они могут работать в офисе."},
+  {pt:"O Pedro e a Ilda podem estacionar o carro na rua.", ipa:"у пéдру и а ильда пóдэнь штасьунáр у кáрру на рýа", ru:"Педру и Илда могут припарковать машину на улице."},
+  {pt:"Vocês podem beber vinho.", ipa:"вусэ́ш пóдэнь бэбэ́р виньу", ru:"Вы можете пить вино."},
+  {pt:"Vocês podem tomar um copo.", ipa:"вусэ́ш пóдэнь тумáр ун кóпу", ru:"Вы можете пропустить по бокалу."},
+  {pt:"Os estudantes podem ir para casa.", ipa:"уж штудáнтыш пóдэнь ир пара кáза", ru:"Студенты могут идти домой."},
+  {pt:"As filhas podem lavar as mãos na casa de banho.", ipa:"аш фильяш пóдэнь лавáр аз мáуш на кáза ды баньу", ru:"Дочери могут помыть руки в ванной."},
+  {pt:"Eles podem sair na próxima paragem.", ipa:"элыш пóдэнь саи́р на прóсима парáжень", ru:"Они могут выйти на следующей остановке."},
+  {pt:"Os professores podem acabar a aula às quatro horas.", ipa:"уш пруфысóрыш пóдэнь акабáр а áула аш куáтру óраш", ru:"Учителя могут закончить урок в четыре часа."},
+  {pt:"Os pais podem tomar o pequeno-almoço comigo.", ipa:"уш пáйш пóдэнь тумáр у пыкэ́ну алмóсу куми́гу", ru:"Родители могут позавтракать со мной."},
+];
+
+const gridOr = document.getElementById('grid-oracoes');
+ORACOES.forEach(d=>gridOr.appendChild(buildCard(d,'phrase')));
+
+const LICAO4 = [
+  {pt:"ir de barco", ipa:"ир ды бáрку", ru:"плыть на лодке (на пароме)"},
+  {pt:"comer pastéis de nata", ipa:"кумэ́р паштэ́йш ды нáта", ru:"есть паштел-де-ната"},
+  {pt:"passear pela praia todos os dias", ipa:"пасиáр пэ́ла прáйа тóдуз уж ди́аш", ru:"гулять по пляжу каждый день"},
+  {pt:"ver o mar", ipa:"вэр у мар", ru:"смотреть на море"},
+  {pt:"tirar uma senha na loja", ipa:"тирáр ума сэ́нья на лóжа", ru:"взять номерок (талон очереди) в магазине"},
+  {pt:"aguardar na fila", ipa:"агуардáр на фила", ru:"ожидать в очереди"},
+  {pt:"falar português", ipa:"фалáр пуртугéш", ru:"говорить по-португальски"},
+  {pt:"apanhar sol em outubro", ipa:"апаньáр сол эн отýбру", ru:"загорать в октябре"},
+  {pt:"falar russo", ipa:"фалáр рýсу", ru:"говорить по-русски"},
+  {pt:"falar com os vizinhos", ipa:"фалáр кон уж визиньуш", ru:"разговаривать с соседями"},
+  {pt:"fazer todas as compras online a qualquer hora", ipa:"фазэ́р тóдаз аш кóмпраш онлайн а куалкэ́р óра", ru:"делать все покупки онлайн в любое время"},
+  {pt:"conduzir o carro sem carta de condução", ipa:"кондузи́р у кáрру сэн кáрта ды кондусáу", ru:"водить машину без прав"},
+  {pt:"chover toda a semana", ipa:"шувэ́р тóда а сымáна", ru:"дождь всю неделю"},
+  {pt:"comprar um desumidificador", ipa:"компрáр ун дызумидификадóр", ru:"купить осушитель воздуха"},
+  {pt:"ver filmes na versão original", ipa:"вэр фи́лмыш на вырсáу уришинáл", ru:"смотреть фильмы в оригинале"},
+  {pt:"tirar os sapatos em casa", ipa:"тирáр уш сапáтуш эн кáза", ru:"снимать обувь дома"},
+  {pt:"usar muitos ovos nas sobremesas", ipa:"узáр мýйнтуз óвуш наш субрымéзаш", ru:"класть много яиц в десерты"},
+  {pt:"utilizar o aquecimento a gás", ipa:"утилизáр у акэсимэ́нту а гаш", ru:"пользоваться газовым отоплением"},
+  {pt:"encontrar-se com os amigos ao fim de semana", ipa:"энконтрáр-сы кон уз амигуш ау фин ды сымáна", ru:"встречаться с друзьями на выходных"},
+  {pt:"usar chapéus e gorros no inverno", ipa:"узáр шапэ́уш и гóрруш ну инвэ́рну", ru:"носить шляпы и шапки зимой"},
+  {pt:"usar protetor solar todos os dias", ipa:"узáр прутэтóр сулáр тóдуз уж ди́аш", ru:"пользоваться солнцезащитным кремом каждый день"},
+  {pt:"fazer churrasco com a família", ipa:"фазэ́р шуррáшку кон а фамилья", ru:"жарить мясо на гриле с семьёй"},
+  {pt:"abrir uma conta bancária", ipa:"абри́р ума кóнта банкáрья", ru:"открыть банковский счёт"},
+  {pt:"alugar um apartamento", ipa:"алугáр ун апартамéнту", ru:"снять квартиру"},
+  {pt:"fazer novos amigos", ipa:"фазэ́р нóвуз амигуш", ru:"заводить новых друзей"},
+  {pt:"comprar comida típica portuguesa", ipa:"компрáр кумида ти́пика пуртугéза", ru:"купить традиционную португальскую еду"},
+  {pt:"ligar a eletricidade", ipa:"лигáр а илетрисидáд", ru:"подключить электричество"},
+  {pt:"ligar a internet de fibra ótica em casa", ipa:"лигáр а интэрнэ́т ды фи́бра óтика эн кáза", ru:"подключить оптоволоконный интернет дома"},
+  {pt:"encontrar um emprego em russo", ipa:"энконтрáр ун эмпрэ́гу эн рýсу", ru:"найти работу на русском языке"},
+  {pt:"encomendar produtos do estrangeiro", ipa:"энкумэндáр прудýтуш ду штранжэйру", ru:"заказывать товары из-за границы"},
+  {pt:"pedir bacalhau com natas num restaurante", ipa:"пыди́р бакальáу кон нáташ нун рыштаурáнт", ru:"заказать бакальяу со сливками в ресторане"},
+  {pt:"almoçar e jantar nos restaurantes a qualquer hora", ipa:"алмусáр и жантáр нуш рыштаурáнтыш а куалкэ́р óра", ru:"обедать и ужинать в ресторанах в любое время"},
+  {pt:"andar de bicicleta durante todo o ano", ipa:"андáр ды бисиклéта дурáнт тóду у áну", ru:"кататься на велосипеде круглый год"},
+  {pt:"manter uma temperatura ideal em casa", ipa:"мантэ́р ума тэмпыратýра идеáл эн кáза", ru:"поддерживать идеальную температуру дома"},
+  {pt:"obter um empréstimo num banco", ipa:"обтэ́р ун эмпрэ́штиму нун бáнку", ru:"получить кредит в банке"},
+  {pt:"comprar comida típica russa", ipa:"компрáр кумида ти́пика рýса", ru:"купить традиционную русскую еду"},
+];
+
+const gridL4 = document.getElementById('grid-licao4');
+LICAO4.forEach(d=>gridL4.appendChild(buildCard(d,'phrase')));
+
 /* ---- Speech ---- */
 const rateEl = document.getElementById('rate');
 const voiceSel = document.getElementById('voice');
@@ -797,7 +882,7 @@ document.getElementById('toggle').addEventListener('change',e=>{
 /* ---- Search / filter ---- */
 const search = document.getElementById('search');
 const empty = document.getElementById('empty');
-const sections = [['grid','head-sub'],['grid-verbs','head-verbs'],['grid-frases','head-frases'],['grid-pares','head-pares'],['grid-pedidos','head-pedidos']];
+const sections = [['grid','head-sub'],['grid-verbs','head-verbs'],['grid-frases','head-frases'],['grid-pares','head-pares'],['grid-pedidos','head-pedidos'],['grid-oracoes','head-oracoes'],['grid-licao4','head-licao4']];
 search.addEventListener('input',()=>{
   const q = search.value.trim().toLowerCase();
   let total = 0;
